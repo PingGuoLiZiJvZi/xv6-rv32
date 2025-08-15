@@ -1,0 +1,7 @@
+set confirm off
+set architecture riscv:rv32
+target remote localhost:1234
+symbol-file kernel/kernel
+b _entry
+b main
+continue
