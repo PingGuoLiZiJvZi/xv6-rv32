@@ -1,5 +1,13 @@
 K=kernel
 U=user
+NAME=xv6
+SRCS = $K/console.c $K/printf.c $K/uart.c $K/kalloc.c $K/spinlock.c \
+  $K/string.c $K/main.c $K/vm.c $K/proc.c $K/trap.c $K/syscall.c \
+  $K/sysproc.c $K/bio.c $K/fs.c $K/log.c $K/sleeplock.c \
+  $K/file.c $K/pipe.c $K/exec.c $K/sysfile.c $K/plic.c $K/virtio_disk.c \
+  $K/start.c 
+
+SRCS += $K/entry.S $K/kernelvec.S $K/swtch.S $K/trampoline.S
 
 OBJS = \
   $K/entry.o \
@@ -49,7 +57,7 @@ endif
 QEMU = ~/qemu-5.0.0/build/riscv32-softmmu/qemu-system-riscv32
 
 CC = $(TOOLPREFIX)gcc
-AS = $(TOOLPREFIX)gas
+AS = $(TOOLPREFIX)gcc
 LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
@@ -155,7 +163,7 @@ QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
 	then echo "-gdb tcp::$(GDBPORT)"; \
 	else echo "-s -p $(GDBPORT)"; fi)
 ifndef CPUS
-CPUS := 3
+CPUS := 1
 endif
 
 QEMUEXTRA = -drive file=fs1.img,if=none,format=raw,id=x1 -device virtio-blk-device,drive=x1,bus=virtio-mmio-bus.1
@@ -164,6 +172,7 @@ QEMUOPTS += -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-devic
 
 qemu: $K/kernel fs.img
 	$(QEMU) $(QEMUOPTS)
+
 
 .gdbinit: .gdbinit.tmpl-riscv
 	sed "s/:1234/:$(GDBPORT)/" < $^ > $@
@@ -213,7 +222,10 @@ tar:
 	mkdir -p /tmp/xv6
 	cp dist/* dist/.gdbinit.tmpl /tmp/xv6
 	(cd /tmp; tar cf - xv6) | gzip >xv6-rev10.tar.gz  # the next one will be 10 (9/17)
+NAME=xv6
+include $(AM_HOME)/Makefile
+LDSCRIPTS = $(K)/kernel.ld
 
 .PHONY: dist-test dist
 
-NAME = xv6
+
