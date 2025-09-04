@@ -26,14 +26,9 @@ SECTIONS
     *(.data)
   }
   .bss : {
-    *(.bss)
+    *(.bss*)
     *(.sbss*)
+	. = ALIGN(0x1000);
      PROVIDE(end = .);
   }
-  _stack_top = ALIGN(0x1000);
-    . = _stack_top + 0x100000;
-  _stack_pointer = .;
-  end = .;
-  _end = .;
-  _heap_start = ALIGN(0x1000);
 }

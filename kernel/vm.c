@@ -30,12 +30,14 @@ kvminit()
   memset(kernel_pagetable, 0, PGSIZE);
 
   // uart registers
-  kvmmap(UART0, UART0, PGSIZE, PTE_R | PTE_W);
+//   kvmmap(UART0, UART0, PGSIZE, PTE_R | PTE_W);
 
   // virtio mmio disk interface
   kvmmap(VIRTIO0, VIRTIO0, PGSIZE, PTE_R | PTE_W);
 
   // CLINT
+  // 在移植的SoC中，UART和CINT的地址极其接近，
+  // 导致在映射CLINT时覆盖了UART的映射，
   kvmmap(CLINT, CLINT, 0x10000, PTE_R | PTE_W);
 
   // PLIC
@@ -58,7 +60,7 @@ void
 kvminithart()
 {
   w_satp(MAKE_SATP(kernel_pagetable));
-  sfence_vma();
+//   sfence_vma();
 }
 
 // Return the address of the PTE in page table pagetable
@@ -88,7 +90,7 @@ kvminithart()
 //    8.. 9 --  2 bits reserved for OS
 //    0.. 7 -- flags: Valid/Read/Write/Execute/User/Global/Accessed/Dirty
 // 
-
+__attribute__((noinline)) 
 static pte_t *
 walk(pagetable_t pagetable, uint32 va, int alloc)
 {
