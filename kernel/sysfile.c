@@ -414,12 +414,10 @@ sys_exec(void)
   char path[MAXPATH], *argv[MAXARG];
   int i;
   uint32 uargv, uarg;
-
   if(argstr(0, path, MAXPATH) < 0 || argaddr(1, &uargv) < 0){
     return -1;
   }
-
-  memset(argv, 0, sizeof(argv));
+    memset(argv, 0, sizeof(argv));
   for(i=0;; i++){
     if(i >= NELEM(argv)){
       goto bad;
@@ -438,10 +436,8 @@ sys_exec(void)
       goto bad;
     }
   }
-
-  int ret = exec(path, argv);
-
-  for(i = 0; i < NELEM(argv) && argv[i] != 0; i++)
+    int ret = exec(path, argv);
+    for(i = 0; i < NELEM(argv) && argv[i] != 0; i++)
     kfree(argv[i]);
 
   return ret;

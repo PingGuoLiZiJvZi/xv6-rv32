@@ -6,8 +6,8 @@
 # exec(init, argv)
 .globl start
 start:
-        la a0, init
-        la a1, argv
+        addi a0,x0,0x1c
+        addi a1,x0,0x3f
         li a7, SYS_exec
         ecall
 

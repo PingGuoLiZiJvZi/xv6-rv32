@@ -80,6 +80,7 @@ argstr(int n, char *buf, int max)
   uint32 addr;
   if(argaddr(n, &addr) < 0)
     return -1;
+	printf("the %dth arg addr is 0x%x\n", n, addr);
   return fetchstr(addr, buf, max);
 }
 

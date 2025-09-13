@@ -4,7 +4,7 @@ NAME=xv6
 SRCS = $K/console.c $K/printf.c $K/uart.c $K/kalloc.c $K/spinlock.c \
   $K/string.c $K/main.c $K/vm.c $K/proc.c $K/trap.c $K/syscall.c \
   $K/sysproc.c $K/bio.c $K/fs.c $K/log.c $K/sleeplock.c \
-  $K/file.c $K/pipe.c $K/exec.c $K/sysfile.c $K/plic.c $K/virtio_disk.c \
+  $K/file.c $K/pipe.c $K/exec.c $K/sysfile.c $K/plic.c $K/ramdisk.c \
   $K/start.c 
 
 SRCS += $K/entry.S $K/kernelvec.S $K/swtch.S $K/trampoline.S
@@ -36,7 +36,7 @@ OBJS = \
   $K/sysfile.o \
   $K/kernelvec.o \
   $K/plic.o \
-  $K/virtio_disk.o
+  $K/ramdisk.o
 
 # riscv32-unknown-elf- or riscv32-linux-gnu-
 # perhaps in /opt/riscv/bin
@@ -87,7 +87,7 @@ $K/kernel: $(OBJS) $K/kernel.ld $U/initcode
 	$(OBJDUMP) -t $K/kernel | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $K/kernel.sym
 
 $U/initcode: $U/initcode.S
-	$(CC) $(CFLAGS) -nostdinc -I. -Ikernel -c $U/initcode.S -o $U/initcode.o
+	$(CC) $(CFLAGS) -march=rv32ia -nostdinc -I. -Ikernel -c $U/initcode.S -o $U/initcode.o
 	$(LD) $(LDFLAGS) -N -e start -Ttext 0 -o $U/initcode.out $U/initcode.o $(COMPILER_RT)
 	$(OBJCOPY) -S -O binary $U/initcode.out $U/initcode
 	$(OBJDUMP) -S $U/initcode.o > $U/initcode.asm
@@ -98,7 +98,7 @@ tags: $(OBJS) _init
 ULIB = $U/ulib.o $U/usys.o $U/printf.o $U/umalloc.o
 
 _%: %.o $(ULIB)
-	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^ $(COMPILER_RT)
+	$(LD) $(LDFLAGS) -e main -Ttext 0 -o $@ $^ $(COMPILER_RT)
 	$(OBJDUMP) -S $@ > $*.asm
 	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $*.sym
   
@@ -148,13 +148,6 @@ fs.img: mkfs/mkfs README $(UPROGS)
 
 -include kernel/*.d user/*.d
 
-clean: 
-	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
-	*/*.o */*.d */*.asm */*.sym \
-	$U/initcode $U/initcode.out $K/kernel fs.img \
-	mkfs/mkfs .gdbinit \
-        $U/usys.S \
-	$(UPROGS)
 
 # try to generate a unique GDB port
 GDBPORT = $(shell expr `id -u` % 5000 + 25000)
@@ -224,6 +217,18 @@ tar:
 	(cd /tmp; tar cf - xv6) | gzip >xv6-rev10.tar.gz  # the next one will be 10 (9/17)
 NAME=xv6
 include $(AM_HOME)/Makefile
+
+
+clean: 
+	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
+	*/*.o */*.d */*.asm */*.sym \
+	$U/initcode $U/initcode.out $K/kernel fs.img \
+	mkfs/mkfs .gdbinit \
+        $U/usys.S \
+	$(UPROGS)
+	rm -rf build
+
+
 LDSCRIPTS = $(K)/kernel.ld
 
 .PHONY: dist-test dist

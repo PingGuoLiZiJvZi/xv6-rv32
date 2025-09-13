@@ -22,12 +22,15 @@ main()
     procinit();      // process table
     trapinit();      // trap vectors
     trapinithart();  // install kernel trap vector
-    plicinit();      // set up interrupt controller
-    plicinithart();  // ask PLIC for device interrupts
+    // plicinit();      // set up interrupt controller
+    // plicinithart();  // ask PLIC for device interrupts
+	// 移植的目标SoC没有PLIC，注释掉上面两行
+	// 将设备中断重写为轮询
     binit();         // buffer cache
     iinit();         // inode cache
     fileinit();      // file table
-    virtio_disk_init(); // emulated hard disk
+    // virtio_disk_init(); // emulated hard disk
+	// 已使用ramdisk，注释掉上面一行
     userinit();      // first user process
     __sync_synchronize();
     started = 1;
