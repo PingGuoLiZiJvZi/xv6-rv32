@@ -43,10 +43,13 @@ int exec(char *path, char **argv)
 	sz = 0;
 	for (i = 0, off = elf.phoff; i < elf.phnum; i++, off += sizeof(ph))
 	{
-
+		printf("loading ph %d at off 0x%x\n", i, off);
 		if (readi(ip, 0, (uint32)&ph, off, sizeof(ph)) != sizeof(ph))
 			goto bad;
 		// 打印段的所有信息
+		printf("ph.type 0x%x, off 0x%x, vaddr 0x%x, paddr 0x%x, filesz 0x%x, memsz 0x%x, align 0x%x\n",
+			   ph.type, ph.off, ph.vaddr, ph.paddr, ph.filesz, ph.memsz, ph.align);
+
 		if (ph.type != ELF_PROG_LOAD)
 			continue;
 		if (ph.memsz < ph.filesz)
@@ -57,6 +60,7 @@ int exec(char *path, char **argv)
 			goto bad;
 		if (ph.vaddr % PGSIZE != 0)
 			goto bad;
+		printf("called loadseg with vaddr 0x%x, off 0x%x, filesz 0x%x\n", ph.vaddr, ph.off, ph.filesz);
 		if (loadseg(pagetable, ph.vaddr, ip, ph.off, ph.filesz) < 0)
 			goto bad;
 	}
@@ -153,6 +157,7 @@ loadseg(pagetable_t pagetable, uint32 va, struct inode *ip, uint offset, uint sz
 			n = sz - i;
 		else
 			n = PGSIZE;
+		printf("offset 0x%x -> pa 0x%x\n", offset + i, pa);
 		if (readi(ip, 0, (uint32)pa, offset + i, n) != n)
 			return -1;
 	}
