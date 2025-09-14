@@ -68,15 +68,7 @@ void uartputc(int c)
 // return -1 if none is waiting.
 int uartgetc(void)
 {
-	if (ReadReg(LSR) & 0x01)
-	{
-		// input data is ready.
-		return ReadReg(RHR);
-	}
-	else
-	{
-		return -1;
-	}
+	return ReadReg(RHR);
 }
 
 // trap.c calls here when the uart interrupts.
@@ -85,7 +77,7 @@ void uartintr(void)
 	while (1)
 	{
 		int c = uartgetc();
-		if (c == -1)
+		if (c == 255)
 			break;
 		consoleintr(c);
 	}
